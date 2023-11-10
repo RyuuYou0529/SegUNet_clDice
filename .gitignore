@@ -1,0 +1,8 @@
+# dir
+__pycache__
+out/
+data/
+
+# file
+train_SegNet3D_MixLoss.sh
+eval_MixLoss.py
