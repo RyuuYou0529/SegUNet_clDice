@@ -4,3 +4,4 @@ features: [64,128,256,512]
 norm_type: batch
 patch_size: 64
 overlap: 0
+use_skeleton: true
