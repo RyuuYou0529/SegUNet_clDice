@@ -34,12 +34,12 @@ class skels_dataset(Dataset):
         super().__init__()
         print(f'patch_size: {patch_size}')
         print(f'overlap: {overlap}')
-        print(f'preprocess: {use_preprocess}')
-        
 
         img_path = os.path.join(path, 'img_ori')
+        img_deconv_path = os.path.join(path, 'img_deconv_ori')
         mask_path = os.path.join(path, 'mask') if not use_skeleton else os.path.join(path, 'mask_skeleton')
         print(f'image path: {img_path}')
+        print(f'image_deconv path: {img_deconv_path}')
         print(f'mask path: {mask_path}')
 
         emp = EMPatches()
@@ -52,29 +52,35 @@ class skels_dataset(Dataset):
         self.fgp_in_patches = []
 
         img_name_list = sorted(os.listdir(img_path))
+        img_deconv_name_list = sorted(os.listdir(img_deconv_path))
         mask_name_list = sorted(os.listdir(mask_path))
 
-        self.img_name_list = img_name_list
         self.mask_name_list = mask_name_list
+        self.img_name_list = img_name_list
 
-        for index, (img_name, mask_name) in tqdm(enumerate(zip(img_name_list, mask_name_list))):
+        for index, (img_name, img_deconv_name, mask_name) in tqdm(enumerate(zip(img_name_list, img_deconv_name_list, mask_name_list))):
             img = tiff.imread(os.path.join(img_path, img_name))
             img = img.astype(np.float32)
+
+            img_deconv = tiff.imread(os.path.join(img_deconv_path, img_deconv_name))
+            img_deconv = img_deconv.astype(np.float32)
 
             # preprocess image
             if use_preprocess:
                 img = preprocess(img)
+                img_deconv = preprocess(img_deconv)
 
             mask = tiff.imread(os.path.join(mask_path, mask_name))
             mask = mask.astype(np.float32)
 
             # extract pathces
             img_patches, img_indices = emp.extract_patches(img, patchsize=patch_size, overlap=overlap, stride=None, vox=True)
+            img_deconv_patches, img_deconv_indices = emp.extract_patches(img_deconv, patchsize=patch_size, overlap=overlap, stride=None, vox=True)
             mask_patches, mask_indices = emp.extract_patches(mask, patchsize=patch_size, overlap=overlap, stride=None, vox=True)
             
             # add patches
-            self.img_patches_list = self.img_patches_list + img_patches
-            self.mask_patches_list = self.mask_patches_list + mask_patches
+            self.img_patches_list = self.img_patches_list + img_patches + img_deconv_patches
+            self.mask_patches_list = self.mask_patches_list + mask_patches + mask_patches
 
         # indices of pathces
         self.patches_indices = mask_indices

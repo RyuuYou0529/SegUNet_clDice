@@ -5,7 +5,7 @@ python train_SegNet3D.py    -model SegNet3D_cldice \
                             -data data/skels_aug \
                             -gpus 0 \
                             -batch_per_gpu 32 \
-                            -epochs 1000 \
+                            -epochs 200 \
                             -save_every 10 \
                             -out out \
                             -cfg config/SegNet3D.yaml \
