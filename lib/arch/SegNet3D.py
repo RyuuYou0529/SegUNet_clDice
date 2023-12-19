@@ -112,6 +112,7 @@ class UNet(nn.Module):
         return x
 
 def get_model(args):
+    print('model features: ', args.features)
     model = UNet(in_channels=args.in_channels,
                  out_channels=args.out_channels,
                  features=args.features,

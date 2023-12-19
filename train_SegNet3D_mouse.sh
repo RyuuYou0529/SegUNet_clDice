@@ -1,10 +1,11 @@
-python train_SegNet3D.py    -model SegNet3D_cldice \
+python train_SegNet3D.py    -model SegNet3D_mouse \
                             -arch SegNet3D \
                             -dataset dataset_skels \
                             -trainer trainer_SegNet3D \
-                            -data data/skels_aug \
+                            -data data/mouse_aug \
                             -gpus 0 \
-                            -batch_per_gpu 32 \
+                            -batch_per_gpu 36 \
+                            -shuffle true \
                             -epochs 200 \
                             -save_every 10 \
                             -out out \
@@ -12,6 +13,6 @@ python train_SegNet3D.py    -model SegNet3D_cldice \
                             -slurm \
                             -slurm_ngpus 4 \
                             -slurm_nnodes 1 \
-                            -slurm_nodelist c002 \
+                            -slurm_nodelist c003 \
                             -slurm_partition compute \
                             -reset \
