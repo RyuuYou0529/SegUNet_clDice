@@ -103,8 +103,6 @@ class UNet(nn.Module):
         for i in range(0, len(self.ups), 2):
             x = self.ups[i](x)
             skip = skip_connections[i//2+1]
-            if x.shape != skip.shape:
-                x = nn.functional.pad(x, (0, skip.shape[3]-x.shape[3], 0, skip.shape[2]-x.shape[2]))
             x = torch.cat((skip, x), dim=1)
             x = self.ups[i+1](x)
 

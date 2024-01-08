@@ -1,10 +1,10 @@
-python train_SegNet3D.py    -model SegNet3D_mouse \
+python train_SegNet3D.py    -model SegNet3D \
                             -arch SegNet3D \
-                            -dataset dataset_skels \
+                            -dataset dataset_skels_train \
                             -trainer trainer_SegNet3D \
                             -data data/mouse_aug \
                             -gpus 0 \
-                            -batch_per_gpu 36 \
+                            -batch_per_gpu 64 \
                             -shuffle true \
                             -epochs 200 \
                             -save_every 10 \

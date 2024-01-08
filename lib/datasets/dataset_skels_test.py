@@ -73,17 +73,11 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     from ryu_pytools import arr_info, tensor_to_ndarr
 
-    ds = skels_dataset_test('/home/ryuuyou/E5/project/data/skels_aug/img_deconv', 
+    ds = skels_dataset_test('/home/ryuuyou/E5/project/data/skels_aug/img', 
                        patch_size=64, 
                        overlap=0)
     print(len(ds))
-    
-    # for i in range(2):
-    #     img = ds.__getitem__(i*8)
-    #     arr_info(img, 'img')
-    #     tiff.imwrite(f'img{i}.tif', tensor_to_ndarr(img[0]))
 
     dl = DataLoader(ds, batch_size=100)
     for i, img in enumerate(dl):
         print(f'{i}: [{img.shape}]')
-        arr_info(img, 'img')

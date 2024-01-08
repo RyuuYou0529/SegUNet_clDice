@@ -151,4 +151,9 @@ class Trainer:
                             args = self.args
                         )
 
-        torch.save(state, "{}/weights/{}/Epoch_{}.pth".format(self.args.out, self.args.model, str(epoch+1).zfill(3) ))
+        torch.save(state, "{}/weights/{}/Epoch_{}.pth".format(self.args.out, self.args.model, str(epoch+1).zfill(3)))
+
+        # save pt file
+        # model_script = torch.jit.script(self.model.module)
+        model_script = torch.jit.trace(self.model.module, torch.rand((1,1,self.args.patch_size,self.args.patch_size,self.args.patch_size)).to(self.model.device))
+        torch.jit.save(model_script, "{}/weights/{}/Epoch_{}.pt".format(self.args.out, self.args.model, str(epoch+1).zfill(3)))

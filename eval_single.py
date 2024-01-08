@@ -1,30 +1,30 @@
-from lib.datasets.dataset_skels_test import skels_dataset_test
 from lib.arch.SegNet3D import UNet
+from lib.datasets.dataset_skels_test import preprocess
+from lib.utils.utils import check_dir, tensor_to_ndarr
 
 import torch
-from torch.utils.data import DataLoader
 
-from empatches import EMPatches
 import numpy as np
 import tifffile as tif
 import os
-from tqdm import tqdm
 
-from ryu_pytools import tensor_to_ndarr, arr_info, check_dir
+if __name__ == '__main__':
+    device = torch.device('cuda:0')
+    model = UNet(features=[32,64,128], dim=3)
+    model.to(device)
 
-device = torch.device('cuda:0')
-# model = UNet(features=[32,64,128], dim=3)
-model = UNet(features=[64,128,256], dim=3)
-model.to(device)
-# ckpt_path = 'out/weights/SegNet3D_mini_mouse/Epoch_060.pth'
-ckpt_path = 'out/weights/SegNet3D_lite_mouse/Epoch_160.pth'
-ckpt = torch.load(ckpt_path)
-model.load_state_dict({k.replace('module.',''):v for k,v in ckpt['model'].items()})
-model.eval()
+    ckpt_path = 'out/weights/SegNet3D_mini_mouse/Epoch_200.pth'
+    ckpt = torch.load(ckpt_path)
+    model.load_state_dict({k.replace('module.',''):v for k,v in ckpt['model'].items()})
+    model.eval()
 
-img = tif.imread('data/mouse_aug/img_bg/img_35.tif').astype(np.float32)
-img = torch.from_numpy(img)[None,None].to(device)
+    data_path = 'data/mouse_test/img/img_21.tif'
+    img = tif.imread(data_path).astype(np.float32)
+    img = preprocess(img)
+    img = torch.from_numpy(img)[None,None].to(device)
 
-res = model(img)
+    res = model(img)
 
-tif.imwrite('res.tif', tensor_to_ndarr(res[0,0]))
+    save_path = './'
+    check_dir(save_path)
+    tif.imwrite(os.path.join(save_path, 'res.tif'), tensor_to_ndarr(res[0,0]))

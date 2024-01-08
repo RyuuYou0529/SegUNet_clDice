@@ -66,63 +66,11 @@ class DiceLoss(torch.nn.Module):
     def forward(self, y_pred, y_true):
         return 1 - self.dice_coefficient(y_pred, y_true)
 
-
-# ====== V2 ======
-class FocalLoss(nn.Module):
-    def __init__(self, alpha=1, gamma=2, logits=False, reduce=True):
-        super(FocalLoss, self).__init__()
-        self.alpha = alpha
-        self.gamma = gamma
-        self.logits = logits
-        self.reduce = reduce
-
-    def forward(self, inputs, targets):
-        if self.logits:
-            BCE_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduce=False)
-        else:
-            BCE_loss = F.binary_cross_entropy(inputs, targets, reduction='none')
-        pt = torch.exp(-BCE_loss)
-        F_loss = self.alpha * (1-pt)**self.gamma * BCE_loss
-
-        if self.reduce:
-            return torch.mean(F_loss)
-        else:
-            return F_loss
-
-class MixLoss(nn.Module):
-    def __init__(self, scale_focal=0.2, scale_cldice=1.0) -> None:
-        super().__init__()
-        self.cldice_loss_fn = Soft_Dice_And_ClDice()
-        self.focal_loss_fn = FocalLoss()
-        self.scale_focal = scale_focal
-        self.scale_cldice = scale_cldice
-    def forward(self, pred, target):
-        cldice_loss = self.cldice_loss_fn(pred, target)
-        focal_loss = self.focal_loss_fn(pred, target)
-        loss = self.scale_cldice*cldice_loss + self.scale_focal*focal_loss
-        return loss
-
-class Soft_Dice_And_ClDice(nn.Module):
-    def __init__(self, alpha=0.5) -> None:
-        super().__init__()
-        self.cldice_loss_fn = ClDiceLoss()
-        self.dice_loss_fn = DiceLoss()
-        self.alpha = alpha
-    def forward(self, pred, target):
-        cldice_loss = self.cldice_loss_fn(pred, target)
-        dice_loss = self.dice_loss_fn(pred, target)
-        loss = self.alpha*cldice_loss + (1-self.alpha)*dice_loss
-        return loss
-
 def get_loss(args):
     return ClDiceLoss()
 
-# def get_loss(args):
-#     return MixLoss()
-
 if __name__ == '__main__':
-    # loss_fn = ClDiceLoss()
-    loss_fn = MixLoss()
+    loss_fn = ClDiceLoss()
     mask = torch.rand((1,1,64,64,64))
     pred_mask = torch.rand_like(mask)
     loss = loss_fn(mask, pred_mask)

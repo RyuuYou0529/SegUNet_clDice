@@ -4,5 +4,5 @@ out/
 data/
 
 # file
-train_SegNet3D_MixLoss.sh
-eval_MixLoss.py
+train_SegNet3D_test.sh
+test.py

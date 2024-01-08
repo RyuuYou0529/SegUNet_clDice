@@ -22,14 +22,14 @@ def preprocess(img,percentiles=[0.01,0.9999]):
     return img
 
 class skels_dataset(Dataset):
-    def __init__(self, path, patch_size=64, overlap=0.0, use_preprocess=True, use_skeleton=False) -> None:
+    def __init__(self, path, patch_size=64, overlap=0.0, use_preprocess=True) -> None:
         super().__init__()
         print(f'patch_size: {patch_size}')
         print(f'overlap: {overlap}')
         print(f'preprocess: {use_preprocess}')
         
-        img_path = os.path.join(path, 'img_ori')
-        mask_path = os.path.join(path, 'mask') if not use_skeleton else os.path.join(path, 'mask_skeleton')
+        img_path = os.path.join(path, 'img')
+        mask_path = os.path.join(path, 'mask')
         bg_path = os.path.join(path, 'img_bg')
         print(f'image path: {img_path}')
         print(f'mask path: {mask_path}')
@@ -39,14 +39,13 @@ class skels_dataset(Dataset):
         # patches
         self.img_patches_list = []
         self.mask_patches_list = []
-        # indices
-        self.patches_indices = None
+
         # number of foreground points in each patches
         self.fgp_in_patches = []
 
-        img_name_list = sorted(os.listdir(img_path))#[0:10]
-        mask_name_list = sorted(os.listdir(mask_path))#[0:10]
-        bg_name_list = os.listdir(bg_path)#[0:10]
+        img_name_list = sorted(os.listdir(img_path))
+        mask_name_list = sorted(os.listdir(mask_path))
+        bg_name_list = os.listdir(bg_path)
 
         self.img_name_list = img_name_list
         self.mask_name_list = mask_name_list
@@ -77,7 +76,6 @@ class skels_dataset(Dataset):
 
         # add bg img
         for index, bg_name in tqdm(enumerate(bg_name_list)):
-            # print(index, ': ',os.path.join(bg_path, bg_name))
             bg = tiff.imread(os.path.join(bg_path, bg_name))
             bg = bg.astype(np.float32)
 
@@ -121,29 +119,17 @@ class skels_dataset(Dataset):
 def get_dataset(args):
     train_dataset = skels_dataset(path=args.data, 
                                   patch_size=args.patch_size, 
-                                  overlap=args.overlap, 
-                                  use_skeleton=args.use_skeleton)
+                                  overlap=args.overlap)
     return train_dataset
 
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
-    from ryu_pytools import arr_info, tensor_to_ndarr
 
     ds = skels_dataset('data/mouse_aug', 
-                       patch_size=64, 
-                       overlap=0,
-                       use_skeleton=True)
+                       patch_size=128, 
+                       overlap=0,)
     print(len(ds))
     print(ds.fgp_in_patches)
-    print(len(np.where(ds.fgp_in_patches<50)[0]))
-    print(len(np.where(ds.fgp_in_patches==0)[0]))
-    
-
-    img, mask = ds.__getitem__(-1)
-    arr_info(img, 'img')
-    arr_info(mask, 'mask')
-    tiff.imwrite(f'img.tif', tensor_to_ndarr(img[0]))
-    tiff.imwrite(f'mask.tif', tensor_to_ndarr(mask[0]))
 
     dl = DataLoader(ds, batch_size=5, shuffle=True)
     for i, (img, mask) in enumerate(dl):
